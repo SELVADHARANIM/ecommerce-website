@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini E-Commerce Store</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    color: #333;
+}
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+header h1 {
+    font-size: 2em;
+}
+main {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+#filter {
+    margin-bottom: 20px;
+    text-align: center;
+}
+#filter select {
+    padding: 8px 12px;
+    font-size: 1em;
+}
+#products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+.product {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+.product:hover {
+    transform: translateY(-5px);
+}
+.product img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.product h3 {
+    margin-bottom: 5px;
+}
+.product p {
+    font-size: 0.9em;
+    color: #666;
+}
+.product .price {
+    font-weight: bold;
+    margin: 10px 0;
+}
+.product button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.product button:hover {
+    background-color: #45a049;
+}
+#cart {
+    position: fixed;
+    right: 20px;
+    top: 80px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    width: 250px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+#cart h2 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+#cart ul {
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+#cart ul li {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+#cart .total {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+@media(max-width:768px){
+    #cart {
+        position: static;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+}
+</style>
+</head>
+<body>
+<header>
+    <h1>Mini E-Commerce Store</h1>
+</header>
+<main>
+    <div id="filter">
+        <label for="category">Filter by Category: </label>
+        <select id="category">
+            <option value="all">All</option>
+            <option value="electronics">Electronics</option>
+            <option value="clothing">Clothing</option>
+            <option value="books">Books</option>
+        </select>
+    </div>
+    <div id="products"></div>
+</main>
+<div id="cart">
+    <h2>Cart</h2>
+    <ul id="cart-items">
+        <li>No items yet</li>
+    </ul>
+    <div class="total">Total: $0</div>
+</div>
+<script>
+const products = [
+    {
+        id: 1,
+        name: "Smartphone",
+        category: "electronics",
+        price: 299,
+        img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        id: 2,
+        name: "Laptop",
+        category: "electronics",
+        price: 699,
+        img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        id: 3,
+        name: "T-Shirt",
+        category: "clothing",
+        price: 25,
+        img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        id: 4,
+        name: "Jeans",
+        category: "clothing",
+        price: 40,
+        img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        id: 5,
+        name: "Book 1",
+        category: "books",
+        price: 15,
+        img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        id: 6,
+        name: "Book 2",
+        category: "books",
+        price: 20,
+        img: "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=400&q=80"
+    }
+];
+
+const productsContainer = document.getElementById("products");
+const categorySelect = document.getElementById("category");
+
+function displayProducts(filter="all"){
+    productsContainer.innerHTML = "";
+    const filtered = filter === "all" ? products : products.filter(p => p.category === filter);
+    filtered.forEach(product => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+            <img src="${product.img}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p class="price">$${product.price}</p>
+            <button onclick="addToCart(${product.id})">Add to Cart</button>
+        `;
+        productsContainer.appendChild(div);
+    });
+}
+
+categorySelect.addEventListener("change", ()=>{
+    displayProducts(categorySelect.value);
+});
+
+displayProducts();
+
+let cart = [];
+const cartItems = document.getElementById("cart-items");
+const cartTotal = document.querySelector("#cart .total");
+
+function addToCart(id){
+    const product = products.find(p => p.id === id);
+    cart.push(product);
+    updateCart();
+}
+
+function updateCart(){
+    cartItems.innerHTML = "";
+    if(cart.length === 0){
+        cartItems.innerHTML = "<li>No items yet</li>";
+        cartTotal.textContent = "Total: $0";
+        return;
+    }
+    let total = 0;
+    cart.forEach((item, index) => {
+        total += item.price;
+        const li = document.createElement("li");
+        li.textContent = `${item.name} - $${item.price} `;
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+        removeBtn.style.marginLeft = "10px";
+        removeBtn.style.backgroundColor = "#f44336";
+        removeBtn.style.color = "white";
+        removeBtn.style.border = "none";
+        removeBtn.style.padding = "2px 6px";
+        removeBtn.style.borderRadius = "3px";
+        removeBtn.style.cursor = "pointer";
+        removeBtn.onclick = () => {
+            cart.splice(index, 1);
+            updateCart();
+        };
+        li.appendChild(removeBtn);
+        cartItems.appendChild(li);
+    });
+    cartTotal.textContent = `Total: $${total}`;
+}
+</script>
+</body>
+</html>
